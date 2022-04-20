@@ -1,0 +1,51 @@
+# POST http://localhost:4000/api/login
+# Content-Type: application/json
+
+# {
+#   "username": "blabla",
+#   "email": "user@gmail.com",
+#   "level": "user"
+# }
+
+# POST http://localhost:4000/api/requests
+# Content-Type: : application/json
+
+# {
+#   "userRequest": "user",
+#   "department": "Finance",
+#   "email": "user@gmail.com",
+#   "priority": "high",
+#   "titleRequest": "Request Title",
+#   "subjekRequest": "Request Subjek",
+# }
+
+# POST http://localhost:4000/api/login-admin
+# Content-Type: application/json
+
+# {
+#   "username": "admin",
+#   "password": "secret"
+# }
+
+# GET http://localhost:4000/api/users
+# Content-Type: application/json
+# Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTYsInVzZXJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImxldmVsIjoiYWRtaW4iLCJpYXQiOjE2NDY0NzU4ODQsImV4cCI6MTY0NjU2MjI4NH0.HUl8nn3MbqLQL3-c83NiP3T7fRhTQ2Kazq0tQ_XfOCk
+
+# POST http://localhost:4000/api/categories
+# Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTYsInVzZXJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImxldmVsIjoiYWRtaW4iLCJpYXQiOjE2NDY0NzU4ODQsImV4cCI6MTY0NjU2MjI4NH0.HUl8nn3MbqLQL3-c83NiP3T7fRhTQ2Kazq0tQ_XfOCk
+# Content-Type: application/json
+
+# {
+#     "category": "category",
+# }
+
+# GET http://localhost:4000/api/requests-reply/2
+
+# POST http://localhost:4000/api/reply-req/2
+# Content-Type: application/json
+
+# {
+#     "message_reply": "reply"
+# }
+
+GET http://localhost:4000/api/request/paginate?page=1&limit=1
