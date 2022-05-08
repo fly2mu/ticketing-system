@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome } from "@fortawesome/free-solid-svg-icons";
+import { faHome, faSearch } from "@fortawesome/free-solid-svg-icons";
 import {
   Breadcrumb,
   Card,
@@ -8,6 +8,9 @@ import {
   Form,
   Button,
   Modal,
+  Spinner,
+  Row,
+  Col,
 } from "@themesberg/react-bootstrap";
 import { toast } from "react-toastify";
 
@@ -18,11 +21,14 @@ import {
   createUserData,
   deleteUserData,
   updateUserData,
+  searchUsers,
 } from "../../api/userApi";
 
 export default () => {
   const [listUsers, setListUsers] = useState([]);
   const [showDefault, setShowDefault] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const [keyword, setKeyword] = useState("");
   const [modalTitle, setModalTitle] = useState("");
   const [levelUser, setLevelUser] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
@@ -114,6 +120,20 @@ export default () => {
     }
   };
 
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    try {
+      setIsPending(true);
+      const search = await searchUsers(keyword, levelUser);
+      setListUsers(search.data.data);
+      setKeyword("");
+      setIsPending(false);
+    } catch (error) {
+      console.log(error);
+      toast.warning("User not found");
+    }
+  };
+
   const userLists = listUsers.map((request) => {
     return (
       <>
@@ -187,33 +207,60 @@ export default () => {
           <h4>Users Data</h4>
         </div>
       </div>
-      <div
-        className="pb-3 d-flex justify-content-start"
-        style={{ width: "500px" }}
-      >
-        <Button
-          variant="secondary"
-          onClick={() => {
-            setShowDefault(true);
-            setModalTitle("Create New User");
-          }}
-        >
-          Create User
-        </Button>
-        <Form.Group className="ms-3" style={{ width: "200px" }}>
-          <Form.Select
-            required
-            onChange={(e) => {
-              handleChooseUserType(e);
+      <Row className="pb-3 justify-content-start" md={12}>
+        <Col className="d-flex justify-content-start">
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowDefault(true);
+              setModalTitle("Create New User");
             }}
           >
-            <option defaultValue>Choose user type</option>
-            <option value="admin">admin</option>
-            <option value="team">team</option>
-            <option value="user">user</option>
-          </Form.Select>
-        </Form.Group>
-      </div>
+            Create User
+          </Button>
+          <Form.Group className="ms-3" style={{ width: "200px" }}>
+            <Form.Select
+              required
+              onChange={(e) => {
+                handleChooseUserType(e);
+              }}
+            >
+              <option defaultValue>Choose user type</option>
+              <option value="admin">admin</option>
+              <option value="team">team</option>
+              <option value="user">user</option>
+            </Form.Select>
+          </Form.Group>
+        </Col>
+        <Col>
+          <Form
+            onSubmit={(e) => handleSearch(e)}
+            style={{
+              display: "flex",
+              justifyContent: "between",
+              alignItems: "center",
+            }}
+          >
+            <Form.Control
+              type="text"
+              placeholder="Search..."
+              onChange={(e) => setKeyword(e.target.value)}
+              value={keyword}
+              style={{ marginRight: "10px" }}
+            />
+
+            {isPending ? (
+              <Button variant="primary" type="submit" disabled>
+                <Spinner animation="border" size="sm" role="status" />
+              </Button>
+            ) : (
+              <Button variant="primary" type="submit">
+                <FontAwesomeIcon icon={faSearch} />
+              </Button>
+            )}
+          </Form>
+        </Col>
+      </Row>
       <Card
         border="light"
         className="table-wrapper table-responsive shadow-sm w-100"

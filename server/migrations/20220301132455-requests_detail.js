@@ -33,7 +33,7 @@ module.exports = {
           allowNull: true,
         },
         subjek_request: {
-          type: Sequelize.STRING,
+          type: Sequelize.LONGTEXT,
           allowNull: true,
         },
         message_request: {

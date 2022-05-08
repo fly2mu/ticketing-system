@@ -10,6 +10,8 @@ const {
   createUser,
   deleteUserById,
   updateUser,
+  searchUser,
+  // searchUserAdmin,
 } = require("../src/controller/userController");
 const {
   createRequest,
@@ -35,6 +37,7 @@ const {
   getCategories,
   createCategory,
   deleteCategory,
+  searchCategory,
 } = require("../src/controller/categoryController");
 const { isAuth, isAdmin, isTeam } = require("../src/middleware/isAuth");
 const multer = require("multer");
@@ -70,6 +73,8 @@ router.put("/approve/:id", isAdmin, approveRequestAdmin);
 router.put("/reject/:id", isAdmin, rejectRequestAdmin);
 router.delete("/user/:id_user/level/:level", isAdmin, deleteUserById);
 router.put("/user/:id_user", isAdmin, updateUser);
+router.get("/users/search", isAdmin, searchUser);
+// router.get("/users-admin/search", isAdmin, searchUserAdmin);
 
 // TEAM
 router.get("/requests-team", isTeam, getAllUserProcess);
@@ -88,6 +93,7 @@ router.get("/requests", isAuth, getAllUserRequest);
 
 // CATEGORY
 router.get("/categories", isAuth, getCategories);
+router.get("/categories/search", isAuth, searchCategory);
 router.post("/categories", isAdmin, createCategory);
 router.delete("/categories/:id", isAdmin, deleteCategory);
 
@@ -98,7 +104,7 @@ router.post("/reply-req/:id", isAuth, upload.single("file"), reply_request);
 router.get("/requests-waiting", isAuth, getUserRequestWaiting);
 router.get("/requests-process", isAuth, getUserRequestProcess);
 router.get("/requests-done", isAuth, getUserRequestDone);
-router.get("/request/search", searchData);
+router.get("/request/search", isAuth, searchData);
 // router.get("/request/paginate", paginateData);
 
 module.exports = router;

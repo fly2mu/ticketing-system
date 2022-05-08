@@ -10,7 +10,6 @@ import { Col, Row } from "@themesberg/react-bootstrap";
 
 import { CounterWidget } from "../../components/Widgets";
 import {
-  getAllRequest,
   getRequestWaiting,
   getRequestProcess,
   getRequestDone,
@@ -33,12 +32,10 @@ export default () => {
     (async () => {
       try {
         if (level === "admin") {
-          const { data } = await getAllRequest();
           const countUsers = await getUsersCount();
           const countTeams = await getTeamsCount();
           setUsersCount(countUsers.data.data);
           setTeamsCount(countTeams.data.data);
-          setCountRequest(data.data.length);
 
           const getWaiting = await getRequestWaiting();
           setWaitingCount(getWaiting.data.data.length);
@@ -48,6 +45,11 @@ export default () => {
 
           const getDone = await getRequestDone();
           setDoneCount(getDone.data.data.length);
+          setCountRequest(
+            getWaiting.data.data.length +
+              getProcess.data.data.length +
+              getDone.data.data.length
+          );
         } else {
           const getWaiting = await getRequestWaiting();
           setWaitingCount(getWaiting.data.data.length);

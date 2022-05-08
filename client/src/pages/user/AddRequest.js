@@ -60,6 +60,14 @@ export default () => {
     });
     setIsPending(false);
     history.push(Routes.ListUserRequests.path);
+    window.open(
+      `/#/ticketing/render?user=${request.userRequest}&department=${request.department}&category=${request.category}&title=${request.titleRequest}&subjek=${request.subjekRequest}`,
+      "_blank"
+    );
+    // window.open(
+    //   `/#/ticketing/render?user=alwan&department=Finance&category=Install Software&title=request title&subjek=lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quaerat! Quasi, quisquam. Quasi, quisquam.`,
+    //   "_blank"
+    // );
   };
 
   return (

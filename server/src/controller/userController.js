@@ -410,6 +410,82 @@ const getLevelTeamCount = async (req, res) => {
   }
 };
 
+// const searchUserAdmin = async (req, res) => {
+//   const { user } = req.query;
+
+//   const users = await UserAdmin.findAll({
+//     attributes: ["id", "full_name", "username", "email", "level"],
+//     where: {
+//       [Op.or]: [
+//         { full_name: { [Op.like]: `%${user}%` } },
+//         { username: { [Op.like]: `%${user}%` } },
+//         { email: { [Op.like]: `%${user}%` } },
+//       ],
+//     },
+//   });
+
+//   if (users.length == 0) {
+//     return res.status(400).json({
+//       status: "failed",
+//       message: "User not found!",
+//     });
+//   }
+
+//   return res.status(200).json({
+//     status: "success",
+//     message: "Get all users successfully!",
+//     data: users,
+//   });
+// };
+
+const searchUser = async (req, res) => {
+  const { user, level } = req.query;
+  let users;
+
+  if (level == "true") {
+    users = await UserAdmin.findAll({
+      attributes: ["id", "full_name", "username", "email", "level"],
+      where: {
+        [Op.or]: [
+          { full_name: { [Op.like]: `%${user}%` } },
+          { username: { [Op.like]: `%${user}%` } },
+          { email: { [Op.like]: `%${user}%` } },
+        ],
+      },
+    });
+
+    if (users.length == 0) {
+      return res.status(400).json({
+        status: "failed",
+        message: "User not found!",
+      });
+    }
+  } else {
+    users = await User.findAll({
+      attributes: ["id", "username", "email", "level"],
+      where: {
+        [Op.or]: [
+          { username: { [Op.like]: `%${user}%` } },
+          { email: { [Op.like]: `%${user}%` } },
+        ],
+      },
+    });
+
+    if (users.length == 0) {
+      return res.status(400).json({
+        status: "failed",
+        message: "User not found!",
+      });
+    }
+  }
+
+  return res.status(200).json({
+    status: "success",
+    message: "Get all users successfully!",
+    data: users,
+  });
+};
+
 module.exports = {
   // loginAdmin,
   loginUser,
@@ -421,4 +497,6 @@ module.exports = {
   createUser,
   deleteUserById,
   updateUser,
+  // searchUserAdmin,
+  searchUser,
 };

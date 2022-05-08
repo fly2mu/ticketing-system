@@ -22,6 +22,7 @@ import Lock from "./examples/Lock";
 import NotFoundPage from "./examples/NotFound";
 import ServerError from "./examples/ServerError";
 import AddRequest from "./user/AddRequest";
+import RenderPdf from "./utils/RenderPdf";
 
 // components
 import Sidebar from "../components/Sidebar";
@@ -116,6 +117,7 @@ export default () => (
       component={DetailRequest}
     />
     <RouteWithSidebar exact path={Routes.Chat.path} component={Chat} />
+    <Route exact path={"/ticketing/render"} component={RenderPdf} />
     <RouteWithLoader exact path={Routes.Signup.path} component={Signup} />
     <RouteWithLoader
       exact

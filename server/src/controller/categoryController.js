@@ -1,4 +1,5 @@
 const Category = require("../../models/categories");
+const { Op } = require("sequelize");
 
 const getCategories = (req, res) => {
   Category.findAll({
@@ -64,8 +65,37 @@ const deleteCategory = (req, res) => {
     });
 };
 
+const searchCategory = (req, res) => {
+  const { category } = req.query;
+
+  Category.findAll({
+    attributes: ["id", "category"],
+    raw: true,
+    nest: true,
+    where: {
+      category: {
+        [Op.like]: `%${category}%`,
+      },
+    },
+  })
+    .then((categories) => {
+      res.status(200).json({
+        status: "success",
+        message: "Successfully search category!",
+        data: categories,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        status: "failed",
+        message: "Something went wrong!",
+      });
+    });
+};
+
 module.exports = {
   getCategories,
   createCategory,
   deleteCategory,
+  searchCategory,
 };

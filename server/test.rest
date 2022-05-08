@@ -2,9 +2,8 @@
 # Content-Type: application/json
 
 # {
-#   "username": "blabla",
+#   "username": "user",
 #   "email": "user@gmail.com",
-#   "level": "user"
 # }
 
 # POST http://localhost:4000/api/requests
@@ -19,12 +18,12 @@
 #   "subjekRequest": "Request Subjek",
 # }
 
-# POST http://localhost:4000/api/login-admin
+# POST http://localhost:4000/api/login
 # Content-Type: application/json
 
 # {
-#   "username": "admin",
-#   "password": "secret"
+#   "username": "alwan",
+#   "email": "alwan@gmail.com"
 # }
 
 # GET http://localhost:4000/api/users
@@ -48,4 +47,12 @@
 #     "message_reply": "reply"
 # }
 
-GET http://localhost:4000/api/request/paginate?page=1&limit=1
+# GET http://localhost:4000/api/request/search
+# Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJhbHdhbiIsImVtYWlsIjoiYWx3YW5AZ21haWwuY29tIiwibGV2ZWwiOiJ1c2VyIiwiaWF0IjoxNjUxNTgyMjAzLCJleHAiOjE2NTE2Njg2MDN9.a-5AqAgfNeJbK75oipIgKUcHjU5kEaeUVLj9yFZV4qI
+
+GET http://localhost:4000/api/request/search?search=team
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJhbHdhbiIsImVtYWlsIjoiYWx3YW5AZ21haWwuY29tIiwibGV2ZWwiOiJ1c2VyIiwiaWF0IjoxNjUxNjI2MTA5LCJleHAiOjE2NTE3MTI1MDl9.JJYMDtFwKwfXJd1qNKqsjZmPtiGAx-zL0PdUdte0GLU
+
+# token user : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJhbHdhbiIsImVtYWlsIjoiYWx3YW5AZ21haWwuY29tIiwibGV2ZWwiOiJ1c2VyIiwiaWF0IjoxNjUxNjI2MTA5LCJleHAiOjE2NTE3MTI1MDl9.JJYMDtFwKwfXJd1qNKqsjZmPtiGAx-zL0PdUdte0GLU
+
+# token admin : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImZ1bGxuYW1lIjoiYWRtaW5pc3RyYXRvciIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwibGV2ZWwiOiJhZG1pbiIsImlhdCI6MTY1MTU4NDM4OSwiZXhwIjoxNjUxNjcwNzg5fQ.OtbdtvPSF7BMwr7kwEg4_wW1EZOOUhdya1O3Ro5TZ4Y

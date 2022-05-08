@@ -1,14 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome } from "@fortawesome/free-solid-svg-icons";
+import { faHome, faSearch } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment-timezone";
-import { Breadcrumb, Card, Table, Button } from "@themesberg/react-bootstrap";
+import {
+  Breadcrumb,
+  Card,
+  Table,
+  Button,
+  Form,
+  Pagination,
+  Nav,
+  Row,
+  Col,
+  Spinner,
+} from "@themesberg/react-bootstrap";
 
-import { getAllUserRequest } from "../../api/requestApi";
+import { getAllUserRequest, searchRequest } from "../../api/requestApi";
 import { useHistory } from "react-router-dom";
 
 export default () => {
   const [listRequest, setListRequest] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(0);
+  const [keyword, setKeyword] = useState("");
+  const [isPending, setIsPending] = useState(false);
   const history = useHistory();
   let statusVariant = "";
   let statusText = "";
@@ -16,9 +31,37 @@ export default () => {
   useEffect(() => {
     (async () => {
       const getRequest = await getAllUserRequest();
-      setListRequest(getRequest.data.data);
+      setListRequest(getRequest.data.data.requests);
+      setTotalPage(getRequest.data.data.totalPages);
     })();
   }, []);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setIsPending(true);
+    const search = await searchRequest(keyword);
+    setListRequest(search.data.data);
+    setKeyword("");
+    setIsPending(false);
+  };
+
+  const previousPage = async () => {
+    setCurrentPage((current) => current - 1);
+    if (currentPage <= 1) {
+      setCurrentPage(1);
+    }
+    const getRequest = await getAllUserRequest({ page: currentPage, size: 10 });
+    setListRequest(getRequest.data.data.requests);
+  };
+
+  const nextPage = async () => {
+    setCurrentPage((current) => current + 1);
+    if (currentPage >= totalPage) {
+      setCurrentPage(1);
+    }
+    const getRequest = await getAllUserRequest({ page: currentPage, size: 10 });
+    setListRequest(getRequest.data.data.requests);
+  };
 
   const requestLists = listRequest.map((request) => {
     if (request.ticket_status === "W") {
@@ -108,14 +151,47 @@ export default () => {
         </div>
       </div>
 
-      <Button
-        variant="primary"
-        size="sm"
-        className="mb-3"
-        onClick={() => window.location.reload()}
-      >
-        Refresh
-      </Button>
+      <Row className="wrapper justify-between">
+        <Col>
+          <Button
+            variant="primary"
+            size="sm"
+            className="mb-3"
+            onClick={() => window.location.reload()}
+          >
+            Refresh
+          </Button>
+        </Col>
+
+        <Col>
+          <Form
+            onSubmit={(e) => handleSearch(e)}
+            style={{
+              display: "flex",
+              justifyContent: "between",
+              alignItems: "center",
+            }}
+          >
+            <Form.Control
+              type="text"
+              placeholder="Search..."
+              onChange={(e) => setKeyword(e.target.value)}
+              value={keyword}
+              style={{ marginRight: "10px" }}
+            />
+
+            {isPending ? (
+              <Button variant="primary" type="submit" disabled>
+                <Spinner animation="border" size="sm" role="status" />
+              </Button>
+            ) : (
+              <Button variant="primary" type="submit">
+                <FontAwesomeIcon icon={faSearch} />
+              </Button>
+            )}
+          </Form>
+        </Col>
+      </Row>
 
       <Card border="light" className="table-wrapper table-responsive shadow-sm">
         <Card.Body className="pt-0">
@@ -133,22 +209,22 @@ export default () => {
             </thead>
             <tbody>{requestLists}</tbody>
           </Table>
-          {/* <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
+          <Card.Footer className="px-1 border-0 d-lg-flex align-items-center justify-content-between">
             <Nav>
               <Pagination className="mb-2 mb-lg-0">
-                <Pagination.Prev>Previous</Pagination.Prev>
-                <Pagination.Item active>1</Pagination.Item>
-                <Pagination.Item>2</Pagination.Item>
-                <Pagination.Item>3</Pagination.Item>
-                <Pagination.Item>4</Pagination.Item>
-                <Pagination.Item>5</Pagination.Item>
-                <Pagination.Next>Next</Pagination.Next>
+                <Button
+                  className="me-3"
+                  variant="primary"
+                  onClick={() => previousPage()}
+                >
+                  Previous
+                </Button>
+                <Button variant="primary" onClick={() => nextPage()}>
+                  Next
+                </Button>
               </Pagination>
             </Nav>
-            <small className="fw-bold">
-              Showing <b>{totalTransactions}</b> out of <b>25</b> entries
-            </small>
-          </Card.Footer> */}
+          </Card.Footer>
         </Card.Body>
       </Card>
     </>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome } from "@fortawesome/free-solid-svg-icons";
+import { faHome, faSearch } from "@fortawesome/free-solid-svg-icons";
 import {
   Breadcrumb,
   Card,
@@ -8,16 +8,25 @@ import {
   Button,
   Modal,
   Form,
+  Row,
+  Col,
+  Spinner,
 } from "@themesberg/react-bootstrap";
 
 import { toast } from "react-toastify";
 
 import { getCategories } from "../../api/requestApi";
-import { createCategory, deleteCategory } from "../../api/categoryApi";
+import {
+  createCategory,
+  deleteCategory,
+  searchCategory,
+} from "../../api/categoryApi";
 
 export default () => {
   const [listCategories, setListCategories] = useState([]);
   const [name, setName] = useState({ category: "" });
+  const [keyword, setKeyword] = useState("");
+  const [isPending, setIsPending] = useState(false);
   const [showDefault, setShowDefault] = useState(false);
   const handleClose = () => setShowDefault(false);
 
@@ -62,6 +71,19 @@ export default () => {
     toast.success("Delete category success!");
   };
 
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    try {
+      setIsPending(true);
+      const search = await searchCategory(keyword);
+      setListCategories(search.data.data);
+      setKeyword("");
+      setIsPending(false);
+    } catch (error) {
+      toast.error("Error can't search category!");
+    }
+  };
+
   const categoryList = listCategories.map((request) => {
     return (
       <>
@@ -103,6 +125,10 @@ export default () => {
             <Breadcrumb.Item active>Data Categories</Breadcrumb.Item>
           </Breadcrumb>
           <h4>Data Categories</h4>
+        </div>
+      </div>
+      <Row className="wrapper justify-between mb-2">
+        <Col>
           <Button
             variant="secondary"
             className="m-1"
@@ -110,8 +136,37 @@ export default () => {
           >
             Add New
           </Button>
-        </div>
-      </div>
+        </Col>
+
+        <Col>
+          <Form
+            onSubmit={(e) => handleSearch(e)}
+            style={{
+              display: "flex",
+              justifyContent: "between",
+              alignItems: "center",
+            }}
+          >
+            <Form.Control
+              type="text"
+              placeholder="Search..."
+              onChange={(e) => setKeyword(e.target.value)}
+              value={keyword}
+              style={{ marginRight: "10px" }}
+            />
+
+            {isPending ? (
+              <Button variant="primary" type="submit" disabled>
+                <Spinner animation="border" size="sm" role="status" />
+              </Button>
+            ) : (
+              <Button variant="primary" type="submit">
+                <FontAwesomeIcon icon={faSearch} />
+              </Button>
+            )}
+          </Form>
+        </Col>
+      </Row>
 
       <Card
         border="light"

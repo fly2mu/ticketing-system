@@ -1,13 +1,21 @@
 import api from "./index";
 
 // ADMIN
-export const getAllRequest = () => {
-  return api.get("/requests-admin");
+export const getAllRequest = (data) => {
+  if (data) {
+    return api.get(`/requests-admin?size=${data.size}&page=${data.page}`);
+  } else {
+    return api.get("/requests-admin");
+  }
 };
 
 // TEAM
-export const getAllRequestWithUserProccess = () => {
-  return api.get("/requests-team");
+export const getAllRequestWithUserProccess = (data) => {
+  if (data) {
+    return api.get(`/requests-team?size=${data.size}&page=${data.page}`);
+  } else {
+    return api.get("/requests-team");
+  }
 };
 
 export const requestDone = (id) => {
@@ -15,8 +23,12 @@ export const requestDone = (id) => {
 };
 
 // USER
-export const getAllUserRequest = () => {
-  return api.get("/requests");
+export const getAllUserRequest = (data) => {
+  if (data) {
+    return api.get(`/requests?size=${data.size}&page=${data.page}`);
+  } else {
+    return api.get("/requests");
+  }
 };
 
 export const addRequest = (request) => {
@@ -74,4 +86,8 @@ export const getRequestProcess = () => {
 
 export const getRequestDone = () => {
   return api.get("/requests-done");
+};
+
+export const searchRequest = (keyword) => {
+  return api.get(`/request/search?search=${keyword}`);
 };

@@ -1,5 +1,9 @@
 import api from "./index";
 
+export const searchUsers = (keyword, level) => {
+  return api.get(`/users/search?user=${keyword}&level=${level}`);
+};
+
 export const login = (data) => {
   return api.post("/login", data);
 };

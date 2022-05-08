@@ -5,6 +5,20 @@ const ReplyRequest = require("../../models/reply_request");
 const transporter = require("../../utils/nodemailer");
 const { Op } = require("sequelize");
 
+// pagination function
+const getPagination = (page, size) => {
+  const limit = size ? +size : 10;
+  const offset = page ? +(page - 1) * limit : 0;
+  return { limit, offset };
+};
+
+const getPagingData = (data, page, limit) => {
+  const { count: totalItems, rows: requests } = data;
+  const currentPage = page ? +parseInt(page) : 1;
+  const totalPages = Math.ceil(totalItems / limit);
+  return { totalItems, requests, totalPages, currentPage };
+};
+
 const createRequest = async (req, res) => {
   const url = req.protocol + "://" + req.get("host");
   const {
@@ -89,66 +103,91 @@ const createRequest = async (req, res) => {
 
 // ADMIN
 const getRequests = async (req, res) => {
-  const requests = await Requests.findAll({
+  const { page, size } = req.query;
+  const { limit, offset } = getPagination(page, size);
+  await Requests.findAndCountAll({
+    attributes: [
+      "id",
+      "id_user",
+      "user_request",
+      "ticket_status",
+      "user_process",
+      "createdAt",
+    ],
     include: [
       {
         model: Requests_Detail,
-        attributes: ["title_request", "subjek_request"],
+        attributes: ["title_request"],
       },
       {
         model: Files,
         attributes: ["image", "file_document"],
       },
     ],
+    limit,
+    offset,
     // Ini untuk merapihkan hasil query
     raw: true,
     nest: true,
-  });
-
-  if (!requests) {
-    return res.status(400).json({
-      status: "failed",
-      message: "Something went wrong!",
+  })
+    .then((data) => {
+      const response = getPagingData(data, page, limit);
+      res.status(200).json({
+        status: "success",
+        data: response,
+      });
+    })
+    .catch((err) => {
+      res.status(400).json({
+        status: "failed",
+        message: "Something went wrong!",
+      });
     });
-  }
-
-  res.status(200).json({
-    status: "success",
-    message: "Successfully get requests!",
-    data: requests,
-  });
 };
 
 const getAllUserRequest = async (req, res) => {
-  const requests = await Requests.findAll({
+  const { page, size } = req.query;
+  const { limit, offset } = getPagination(page, size);
+
+  await Requests.findAndCountAll({
     where: { id_user: req.decoded.id },
+    attributes: [
+      "id",
+      "id_user",
+      "user_request",
+      "ticket_status",
+      "user_process",
+      "createdAt",
+    ],
     include: [
       {
         model: Requests_Detail,
-        attributes: ["title_request", "subjek_request"],
+        attributes: ["title_request"],
       },
       {
         model: Files,
         attributes: ["image", "file_document"],
       },
     ],
+    limit,
+    offset,
     // Ini untuk merapihkan hasil query
     raw: true,
     nest: true,
-  });
-
-  if (!requests) {
-    return res.status(500).json({
-      status: "failed",
-      message: "Something went wrong!",
+  })
+    .then((data) => {
+      const response = getPagingData(data, page, limit);
+      res.status(200).json({
+        status: "success",
+        data: response,
+      });
+    })
+    .catch((err) => {
+      res.status(400).json({
+        status: "failed",
+        message: "Something went wrong!",
+      });
     });
-  }
-
-  res.status(200).json({
-    status: "success",
-    message: "Successfully get requests!",
-    data: requests,
-  });
 };
 
 const getUserRequestWaiting = async (req, res) => {
@@ -264,73 +303,128 @@ const getUserRequestDone = async (req, res) => {
 
 // get all requests by user process = team
 const getAllUserProcess = async (req, res) => {
-  const requests = await Requests.findAll({
+  const { page, size } = req.query;
+  const { limit, offset } = getPagination(page, size);
+  await Requests.findAndCountAll({
     attributes: [
       "id",
+      "id_user",
       "user_request",
       "ticket_status",
-      "createdAt",
       "user_process",
+      "createdAt",
     ],
     include: [
       {
         model: Requests_Detail,
-        attributes: ["id", "title_request"],
-      },
-    ],
-    // Ini untuk merapihkan hasil query
-    raw: true,
-    nest: true,
-  });
-
-  if (!requests) {
-    return res.status(500).json({
-      status: "failed",
-      message: "Something went wrong!",
-    });
-  }
-
-  res.status(200).json({
-    status: "success",
-    message: "Successfully get requests!",
-    data: requests,
-  });
-};
-
-// search requests data
-const searchData = async (req, res) => {
-  const { search } = req.query;
-
-  const requests = await Requests.findAll({
-    where: {
-      [Op.or]: [
-        {
-          user_request: {
-            [Op.like]: `%${search}%`,
-          },
-        },
-        {
-          user_process: {
-            [Op.like]: `%${search}%`,
-          },
-        },
-      ],
-    },
-    include: [
-      {
-        model: Requests_Detail,
-        attributes: ["title_request", "subjek_request"],
+        attributes: ["title_request"],
       },
       {
         model: Files,
         attributes: ["image", "file_document"],
       },
     ],
+    limit,
+    offset,
     // Ini untuk merapihkan hasil query
     raw: true,
     nest: true,
-    attributes: ["id", "user_request", "user_process", "ticket_status"],
-  });
+  })
+    .then((data) => {
+      const response = getPagingData(data, page, limit);
+      res.status(200).json({
+        status: "success",
+        data: response,
+      });
+    })
+    .catch((err) => {
+      res.status(400).json({
+        status: "failed",
+        message: "Something went wrong!",
+      });
+    });
+};
+
+// search requests data
+const searchData = async (req, res) => {
+  const { search } = req.query;
+  let requests;
+
+  if (req.decoded.level == "admin" || req.decoded.level == "team") {
+    requests = await Requests.findAll({
+      where: {
+        [Op.or]: [
+          {
+            user_request: {
+              [Op.like]: `%${search}%`,
+            },
+          },
+          {
+            user_process: {
+              [Op.like]: `%${search}%`,
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: Requests_Detail,
+          attributes: ["title_request", "subjek_request"],
+          // where: {
+          //   [Op.or]: [
+          //     {
+          //       title_request: {
+          //         [Op.like]: `%${search}%`,
+          //       },
+          //     },
+          //   ],
+          // },
+        },
+        {
+          model: Files,
+          attributes: ["image", "file_document"],
+        },
+      ],
+      // Ini untuk merapihkan hasil query
+      raw: true,
+      nest: true,
+    });
+  } else {
+    requests = await Requests.findAll({
+      where: {
+        id_user: req.decoded.id,
+        [Op.or]: [
+          {
+            user_process: {
+              [Op.like]: `%${search}%`,
+            },
+          },
+        ],
+      },
+      include: [
+        {
+          model: Requests_Detail,
+          attributes: ["title_request", "subjek_request"],
+          // where: {
+          //   [Op.or]: [
+          //     {
+          //       title_request: {
+          //         [Op.like]: `%${search}%`,
+          //       },
+          //     },
+          //   ],
+          // },
+        },
+        {
+          model: Files,
+          attributes: ["image", "file_document"],
+        },
+      ],
+      // Ini untuk merapihkan hasil query
+      raw: true,
+      nest: true,
+    });
+  }
 
   if (!requests) {
     return res.status(500).json({
@@ -345,41 +439,6 @@ const searchData = async (req, res) => {
     data: requests,
   });
 };
-
-// const paginateData = async (req, res) => {
-//   const { page, limit } = req.query;
-
-//   const requests = await Requests.findAll({
-//     include: [
-//       {
-//         model: Requests_Detail,
-//         attributes: ["title_request", "subjek_request"],
-//       },
-//       {
-//         model: Files,
-//         attributes: ["image", "file_document"],
-//       },
-//     ],
-//     // Ini untuk merapihkan hasil query
-//     raw: true,
-//     nest: true,
-//     offset: (parseInt(page) - 1) * parseInt(limit),
-//     limit,
-//   });
-
-//   if (!requests) {
-//     return res.status(500).json({
-//       status: "failed",
-//       message: "Something went wrong!",
-//     });
-//   }
-
-//   res.status(200).json({
-//     status: "success",
-//     message: "Successfully get requests!",
-//     data: requests,
-//   });
-// };
 
 const getDetailRequestById = async (req, res) => {
   const requests = await Requests.findOne({
@@ -655,5 +714,4 @@ module.exports = {
   getUserRequestDone,
   requestDone,
   searchData,
-  // paginateData,
 };
