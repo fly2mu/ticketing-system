@@ -9,6 +9,15 @@ export const getAllRequest = (data) => {
   }
 };
 
+// HEAD
+export const getAllRequestHead = (data) => {
+  if (data) {
+    return api.get(`/requests-head?size=${data.size}&page=${data.page}`);
+  } else {
+    return api.get("/requests-head");
+  }
+};
+
 // TEAM
 export const getAllRequestWithUserProccess = (data) => {
   if (data) {

@@ -15,6 +15,7 @@ import ListUserRequests from "./user/ListUserRequest";
 import Signin from "./user/Signin";
 // import SigninAdmin from "./admin/SigninAdmin";
 import UserRequestTeam from "./team/UserRequestTeam";
+import ReportRequest from "./team/ReportRequest";
 import Signup from "./examples/Signup";
 import ForgotPassword from "./examples/ForgotPassword";
 import ResetPassword from "./examples/ResetPassword";
@@ -28,6 +29,7 @@ import RenderPdf from "./utils/RenderPdf";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Preloader from "../components/Preloader";
+import ListRequest from "./head/ListRequest";
 
 const RouteWithLoader = ({ component: Component, ...rest }) => {
   const [loaded, setLoaded] = useState(false);
@@ -92,8 +94,19 @@ export default () => (
 
     <RouteWithSidebar
       exact
+      path={Routes.ListRequestHead.path}
+      component={ListRequest}
+    />
+
+    <RouteWithSidebar
+      exact
       path={Routes.UserRequestTeam.path}
       component={UserRequestTeam}
+    />
+    <RouteWithSidebar
+      exact
+      path={Routes.RequestReport.path}
+      component={ReportRequest}
     />
     <RouteWithSidebar exact path={Routes.UserData.path} component={UserData} />
     <RouteWithSidebar

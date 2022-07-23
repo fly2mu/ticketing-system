@@ -18,6 +18,10 @@ module.exports = {
           autoIncrement: true,
           allowNull: false,
         },
+        id_karyawan: {
+          type: Sequelize.STRING,
+          allowNull: true,
+        },
         username: {
           type: Sequelize.STRING,
           allowNull: true,

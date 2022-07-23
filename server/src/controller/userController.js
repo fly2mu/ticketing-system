@@ -2,6 +2,7 @@ const User = require("../../models/user");
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const UserAdmin = require("../../models/user_admin");
+const Employee = require("../../models/employees");
 
 const createToken = (user) => {
   return jwt.sign(
@@ -50,106 +51,128 @@ const createToken = (user) => {
 // };
 
 const loginUser = async (req, res) => {
-  const { username, email } = req.body;
+  const { id_karyawan, password } = req.body;
 
-  const user = await User.findOne({
-    where: { username: username },
-    attributes: ["id", "username", "email", "level"],
+  const findEmployee = await Employee.findOne({
+    where: { EmployeeID: id_karyawan },
+    raw: true,
+    nest: true,
   });
 
-  const user_admin = await UserAdmin.findOne({
-    where: { username: username },
-    attributes: ["id", "full_name", "username", "email", "level"],
-  });
+  if (findEmployee) {
+    let dateBirth = new Date(findEmployee.DateOfBirth)
+      .toISOString()
+      .split(" ")[0]
+      .split("-");
 
-  if (user) {
-    if (email !== user.email) {
+    let passwordFromDb =
+      findEmployee.EmployeeID +
+      "_" +
+      dateBirth[0] +
+      dateBirth[1] +
+      dateBirth[2].split("T")[0];
+
+    if (passwordFromDb !== password) {
       return res.status(400).json({
-        status: "failed",
-        message: "email tidak sesuai!",
+        status: "error",
+        message: "ID atau Password salah!",
       });
     }
 
-    const token = await createToken({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      level: user.level,
+    const user = await User.findOne({
+      where: { id_karyawan: findEmployee.EmployeeID },
+      attributes: ["id", "username", "email", "level"],
     });
 
-    res.status(200).json({
-      status: "success",
-      message: "Login successfully!",
-      data: {
-        username: username,
-        level: user.level,
+    const user_admin = await UserAdmin.findOne({
+      where: { id_karyawan: findEmployee.EmployeeID },
+      attributes: ["id", "full_name", "username", "email", "level"],
+    });
+
+    if (user) {
+      const token = await createToken({
+        id: user.id,
+        username: user.username,
         email: user.email,
-        token: token,
-      },
-    });
-  } else if (user_admin) {
-    if (email !== user_admin.email) {
-      return res.status(400).json({
-        status: "failed",
-        message: "email tidak sesuai!",
+        level: user.level,
       });
-    }
 
-    const token = await createToken({
-      id: user_admin.id,
-      full_name: user_admin.full_name,
-      username: user_admin.username,
-      email: user_admin.email,
-      level: user_admin.level,
-    });
-
-    res.status(200).json({
-      status: "success",
-      message: "Login successfully!",
-      data: {
+      res.status(200).json({
+        status: "success",
+        message: "Login successfully!",
+        data: {
+          username: user.username,
+          level: user.level,
+          email: user.email,
+          token: token,
+        },
+      });
+    } else if (user_admin) {
+      const token = await createToken({
+        id: user_admin.id,
+        full_name: user_admin.full_name,
         username: user_admin.username,
-        fullname: user_admin.full_name,
-        level: user_admin.level,
         email: user_admin.email,
-        token: token,
-      },
-    });
-  } else {
-    const checkEmail = await User.findOne({
-      where: { email: email },
-      attributes: ["email", "level"],
-    });
+        level: user_admin.level,
+      });
 
-    if (checkEmail) {
+      res.status(200).json({
+        status: "success",
+        message: "Login successfully!",
+        data: {
+          username: user_admin.username,
+          fullname: user_admin.full_name,
+          level: user_admin.level,
+          email: user_admin.email,
+          token: token,
+        },
+      });
+    } else {
       return res.status(400).json({
         status: "failed",
-        message: "username tidak sesuai!",
+        message: "Anda tidak memiliki akses!",
       });
+      // const checkEmail = await User.findOne({
+      //   where: { email: email },
+      //   attributes: ["email", "level"],
+      // });
+
+      // if (checkEmail) {
+      //   return res.status(400).json({
+      //     status: "failed",
+      //     message: "username tidak sesuai!",
+      //   });
+      // }
+
+      // const addUser = await User.create({
+      //   username: username,
+      //   email: email,
+      //   level: "user",
+      //   last_login: new Date(),
+      // });
+
+      // const token = createToken({
+      //   id: addUser.id,
+      //   username: addUser.username,
+      //   email: addUser.email,
+      //   level: addUser.level,
+      // });
+
+      // return res.status(200).json({
+      //   status: "success",
+      //   message: "Login successfully!",
+      //   data: {
+      //     username: username,
+      //     level: "user",
+      //     email: email,
+      //     token: token,
+      //   },
+      // });
     }
-
-    const addUser = await User.create({
-      username: username,
-      email: email,
-      level: "user",
-      last_login: new Date(),
-    });
-
-    const token = createToken({
-      id: addUser.id,
-      username: addUser.username,
-      email: addUser.email,
-      level: addUser.level,
-    });
-
-    return res.status(200).json({
-      status: "success",
-      message: "Login successfully!",
-      data: {
-        username: username,
-        level: "user",
-        email: email,
-        token: token,
-      },
+  } else {
+    return res.status(400).json({
+      status: "failed",
+      message: "Karyawan tidak ditemukan!",
     });
   }
 };
@@ -221,11 +244,46 @@ const getAllUserAdmin = async (req, res) => {
   });
 };
 
-const createUser = async (req, res) => {
-  const { full_name, username, email, level } = req.body;
+const getAllUserHead = async (req, res) => {
+  const users = await UserAdmin.findAll({
+    attributes: ["id", "full_name", "username", "email", "level"],
+    where: { level: "head" },
+    raw: true,
+    nest: true,
+  });
 
-  if (level == "admin" || level == "team") {
+  if (!users) {
+    return res.status(400).json({
+      status: "failed",
+      message: "Failed to get all users!",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Get all users successfully!",
+    data: users,
+  });
+};
+
+const createUser = async (req, res) => {
+  const { id_karyawan, full_name, username, email, level } = req.body;
+
+  const findEmployee = await Employee.findOne({
+    where: { EmployeeID: id_karyawan },
+    attributes: ["EmployeeID"],
+  });
+
+  if (!findEmployee) {
+    return res.status(400).json({
+      status: "failed",
+      message: "Karyawan tidak ditemukan!",
+    });
+  }
+
+  if (level == "admin" || level == "head" || level == "team") {
     await UserAdmin.create({
+      id_karyawan: id_karyawan,
       full_name: full_name,
       username: username,
       email: email,
@@ -246,6 +304,7 @@ const createUser = async (req, res) => {
       });
   } else {
     await User.create({
+      id_karyawan: id_karyawan,
       username: username,
       email: email,
       level: level,
@@ -486,6 +545,25 @@ const searchUser = async (req, res) => {
   });
 };
 
+const getEmployee = async (req, res) => {
+  const users = await Employee.findAll({
+    attributes: ["EmployeeID", "EmployeeName"],
+  });
+
+  if (!users) {
+    return res.status(400).json({
+      status: "failed",
+      message: "User not found!",
+    });
+  }
+
+  return res.status(200).json({
+    status: "success",
+    message: "Get all users successfully!",
+    data: users,
+  });
+};
+
 module.exports = {
   // loginAdmin,
   loginUser,
@@ -494,9 +572,11 @@ module.exports = {
   getLevelUserCount,
   getLevelTeamCount,
   getAllUserAdmin,
+  getAllUserHead,
   createUser,
   deleteUserById,
   updateUser,
   // searchUserAdmin,
   searchUser,
+  getEmployee,
 };

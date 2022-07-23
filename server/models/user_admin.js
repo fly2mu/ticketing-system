@@ -8,6 +8,8 @@ const UserAdmin = sequelize.define("user_admins", {
     primaryKey: true,
     autoIncrement: true,
   },
+  id_karyawan: DataTypes.INTEGER,
+  DepartmentID: DataTypes.INTEGER,
   username: DataTypes.STRING,
   full_name: DataTypes.STRING,
   email: DataTypes.STRING,

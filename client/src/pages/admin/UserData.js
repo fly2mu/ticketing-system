@@ -44,7 +44,7 @@ export default () => {
     setUser({});
     setLevelUser(false);
   };
-  const listLevel = ["admin", "team", "user"];
+  const listLevel = ["admin", "head", "team", "user"];
 
   useEffect(() => {
     (async () => {
@@ -76,7 +76,11 @@ export default () => {
   };
 
   const handleChangeUserLevel = (e) => {
-    if (e.target.value === "admin" || e.target.value === "team") {
+    if (
+      e.target.value === "admin" ||
+      e.target.value === "team" ||
+      e.target.value === "head"
+    ) {
       setLevelUser(true);
     } else {
       setLevelUser(false);

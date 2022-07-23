@@ -12,8 +12,12 @@ export const Routes = {
   UserData: { path: "/ticketing/admin/users" },
   Categories: { path: "/ticketing/admin/categories" },
 
+  // HEAD
+  ListRequestHead: { path: "/ticketing/head/requests" },
+
   // TEAM
   UserRequestTeam: { path: "/ticketing/team/requests" },
+  RequestReport: { path: "/ticketing/team/report-requests" },
 
   // BOTH
   Profile: { path: "/ticketing/profile" },

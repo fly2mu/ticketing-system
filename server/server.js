@@ -4,6 +4,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const router = require("./routes/index");
 require("./config/db");
+require("./config/db-2");
 
 const app = express();
 const PORT = process.env.PORT || 4000;

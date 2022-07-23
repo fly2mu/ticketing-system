@@ -3,7 +3,7 @@ const { Op } = require("sequelize");
 
 const getCategories = (req, res) => {
   Category.findAll({
-    attributes: ["id", "category"],
+    attributes: ["id", "category", "id_type"],
     raw: true,
     nest: true,
   })
@@ -23,9 +23,10 @@ const getCategories = (req, res) => {
 };
 
 const createCategory = (req, res) => {
-  const { category } = req.body;
+  const { category, id_type } = req.body;
   Category.create({
     category,
+    id_type,
   })
     .then((category) => {
       res.status(200).json({

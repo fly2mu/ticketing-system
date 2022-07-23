@@ -9,6 +9,8 @@ const User = sequelize.define("user", {
     primaryKey: true,
     autoIncrement: true,
   },
+  id_karyawan: DataTypes.INTEGER,
+  DepartmentID: DataTypes.INTEGER,
   username: DataTypes.STRING,
   email: DataTypes.STRING,
   level: DataTypes.STRING,

@@ -1,22 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome, faSearch } from "@fortawesome/free-solid-svg-icons";
+import {
+  faHome,
+  faEllipsisH,
+  faEye,
+  faTrashAlt,
+  faSearch,
+} from "@fortawesome/free-solid-svg-icons";
 import moment from "moment-timezone";
 import {
   Breadcrumb,
   Card,
   Table,
+  Dropdown,
+  ButtonGroup,
   Button,
-  Form,
   Pagination,
   Nav,
   Row,
   Col,
+  Form,
   Spinner,
 } from "@themesberg/react-bootstrap";
-
-import { getAllUserRequest, searchRequest } from "../../api/requestApi";
 import { useHistory } from "react-router-dom";
+import { toast } from "react-toastify";
+import { Routes } from "../../routes";
+
+import {
+  getAllRequestHead,
+  rejectRequestAdmin,
+  searchRequest,
+} from "../../api/requestApi";
 
 export default () => {
   const [listRequest, setListRequest] = useState([]);
@@ -25,16 +39,18 @@ export default () => {
   const [keyword, setKeyword] = useState("");
   const [isPending, setIsPending] = useState(false);
   const history = useHistory();
-  let statusVariant = "";
-  let statusText = "";
 
   useEffect(() => {
     (async () => {
-      const getRequest = await getAllUserRequest();
-      setListRequest(getRequest.data.data.requests);
-      setTotalPage(getRequest.data.data.totalPages);
+      try {
+        const getRequest = await getAllRequestHead();
+        setListRequest(getRequest.data.data.requests);
+        setTotalPage(getRequest.data.data.totalPages);
+      } catch (error) {
+        console.log("Error data fetching");
+      }
     })();
-  }, []);
+  }, [history]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -45,12 +61,27 @@ export default () => {
     setIsPending(false);
   };
 
+  const handleReject = async (id) => {
+    const rejectRequest = await rejectRequestAdmin(id);
+    if (!rejectRequest) {
+      return toast.error("Something went wrong!");
+    }
+    listRequest.map((item) => {
+      if (item.id === id) {
+        item.ticket_status = "R";
+      }
+      return item;
+    });
+    history.push(Routes.UserRequests.path);
+    toast.success("Successfully reject request!");
+  };
+
   const previousPage = async () => {
     setCurrentPage((current) => current - 1);
     if (currentPage <= 1) {
       setCurrentPage(1);
     }
-    const getRequest = await getAllUserRequest({ page: currentPage, size: 10 });
+    const getRequest = await getAllRequestHead({ page: currentPage, size: 10 });
     setListRequest(getRequest.data.data.requests);
   };
 
@@ -59,11 +90,14 @@ export default () => {
     if (currentPage >= totalPage) {
       setCurrentPage(1);
     }
-    const getRequest = await getAllUserRequest({ page: currentPage, size: 10 });
+    const getRequest = await getAllRequestHead({ page: currentPage, size: 10 });
     setListRequest(getRequest.data.data.requests);
   };
 
   const requestLists = listRequest.map((request) => {
+    let statusVariant = "";
+    let statusText = "";
+
     if (request.ticket_status === "W") {
       statusVariant = "warning";
       statusText = "Waiting";
@@ -106,34 +140,38 @@ export default () => {
             </span>
           </td>
           <td>
-            <span className="fw-normal">
-              {/* create badge button */}
-              <Button
-                variant="info"
-                className="m-1"
-                size="sm"
-                onClick={() =>
-                  history.push(
-                    `/ticketing/request/chat/${request.id}/status/${statusText}`
-                  )
-                }
+            <Dropdown as={ButtonGroup}>
+              <Dropdown.Toggle
+                as={Button}
+                split
+                variant="link"
+                className="text-dark m-0 p-0"
               >
-                detail
-              </Button>
-              <Button
-                variant="danger"
-                className="m-1"
-                size="sm"
-                onClick={() =>
-                  window.open(
-                    `/#/ticketing/render?user=${request.user_request}&department=${request.department}&category=${request.category}&title=${request.requests_detail.title_request}&subjek=${request.requests_detail.subjek_request}`,
-                    "_blank"
-                  )
-                }
-              >
-                PDF
-              </Button>
-            </span>
+                <span className="icon icon-sm">
+                  <FontAwesomeIcon icon={faEllipsisH} className="icon-dark" />
+                </span>
+              </Dropdown.Toggle>
+              <Dropdown.Menu className="w-20">
+                <Dropdown.Item
+                  onClick={() => {
+                    history.push(`/ticketing/detail-request/${request.id}`);
+                  }}
+                >
+                  <FontAwesomeIcon icon={faEye} className="me-2" /> Details
+                </Dropdown.Item>
+
+                {/* <Dropdown.Item>
+                  <FontAwesomeIcon icon={faCheckCircle} className="me-2" />{" "}
+                  Approve
+                </Dropdown.Item> */}
+                <Dropdown.Item
+                  className="text-danger"
+                  onClick={() => handleReject(request.id)}
+                >
+                  <FontAwesomeIcon icon={faTrashAlt} className="me-2" /> Reject
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
           </td>
         </tr>
       </>
@@ -142,12 +180,6 @@ export default () => {
 
   return (
     <>
-      {/* <Button
-        className="btn btn-primary"
-        onClick={() => console.log(singelRequest)}
-      >
-        TEST
-      </Button> */}
       <div className="d-xl-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
         <div className="d-block mb-4 mb-xl-0">
           <Breadcrumb
@@ -157,7 +189,7 @@ export default () => {
             <Breadcrumb.Item>
               <FontAwesomeIcon icon={faHome} />
             </Breadcrumb.Item>
-            <Breadcrumb.Item>Tables</Breadcrumb.Item>
+            <Breadcrumb.Item>User Requests</Breadcrumb.Item>
             <Breadcrumb.Item active>List Requests</Breadcrumb.Item>
           </Breadcrumb>
           <h4>List Requests</h4>
@@ -206,7 +238,10 @@ export default () => {
         </Col>
       </Row>
 
-      <Card border="light" className="table-wrapper table-responsive shadow-sm">
+      <Card
+        border="light"
+        className="table-wrapper table-responsive shadow-sm w-100"
+      >
         <Card.Body className="pt-0">
           <Table hover className="user-table align-items-center">
             <thead>
@@ -222,7 +257,7 @@ export default () => {
             </thead>
             <tbody>{requestLists}</tbody>
           </Table>
-          <Card.Footer className="px-1 border-0 d-lg-flex align-items-center justify-content-between">
+          <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
             <Nav>
               <Pagination className="mb-2 mb-lg-0">
                 <Button

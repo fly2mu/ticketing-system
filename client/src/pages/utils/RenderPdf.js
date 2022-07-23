@@ -18,7 +18,7 @@ export default function RenderPdf() {
   };
   document.title = `Request-${moment().format("DD-MM-YYYY HH:mm:ss")}`;
   window.print();
-  window.close();
+  // window.close();
   // html decacode for checked icon : &#128505;
   return (
     <>

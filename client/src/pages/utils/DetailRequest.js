@@ -144,7 +144,7 @@ export default function DetailRequest() {
                   <li className="py-2 fs-5">
                     User Process:{" "}
                     <b className="text-success">{data.user_process}</b>
-                    {level === "admin" ? (
+                    {level === "admin" || level === "head" ? (
                       <>
                         <br />
                         <Form.Group className="mb-3">
@@ -223,7 +223,7 @@ export default function DetailRequest() {
                 </>
               ) : null}
 
-              {level === "admin" ? (
+              {level === "admin" || level === "head" ? (
                 <Button
                   variant="primary"
                   size="lg"

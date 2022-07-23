@@ -24,10 +24,21 @@ export default () => {
 
   useEffect(() => {
     (async () => {
-      const getRequest = await getCategories();
-      setCategory(getRequest.data.data);
+      const getCategoriesData = await getCategories();
+      setCategory(getCategoriesData.data.data);
     })();
   }, []);
+
+  const filterCategory = (e) => {
+    if (e.target.value === "I") {
+      setCategory(categories.filter((c) => c.id_type === "I"));
+    } else if (e.target.value === "P") {
+      setCategory(categories.filter((c) => c.id_type === "P"));
+    } else {
+      setCategory(categories);
+    }
+    console.log(categories);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,6 +46,7 @@ export default () => {
     formData.append("userRequest", request.userRequest);
     formData.append("department", request.department);
     formData.append("email", request.email);
+    formData.append("type", request.type);
     formData.append("category", request.category);
     formData.append("titleRequest", request.titleRequest);
     formData.append("subjekRequest", request.subjekRequest);
@@ -53,6 +65,7 @@ export default () => {
       userRequest: localStorage.getItem("username"),
       department: "",
       email: "",
+      type: "",
       category: "",
       // priority: "",
       titleRequest: "",
@@ -109,6 +122,15 @@ export default () => {
               placeholder="Masukkan email"
               value={localStorage.getItem("email")}
             />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Type</Form.Label>
+            <Form.Select required onChange={(e) => filterCategory(e)}>
+              <option defaultValue>Open this select menu</option>
+              <option value="I">Incident</option>
+              <option value="P">Request</option>
+            </Form.Select>
           </Form.Group>
 
           <Form.Group className="mb-3">

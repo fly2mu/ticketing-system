@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faLock, faUser } from "@fortawesome/free-solid-svg-icons";
 import {
   Col,
   Row,
@@ -20,12 +20,13 @@ import { login } from "../../api/userApi";
 
 export default () => {
   const [user, setUser] = useState({
-    username: "",
-    email: "",
+    id_karyawan: "",
+    password: "",
     // level: "",
   });
   const [pending, setIsPending] = useState(false);
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const history = useHistory();
   const token = localStorage.getItem("token");
   const { isExpired } = useJwt(token);
@@ -53,15 +54,15 @@ export default () => {
       history.push(Routes.DashboardOverview.path);
     } catch (error) {
       setIsPending(false);
-      console.log(error);
       setError(true);
+      setErrorMessage(error.response.data.message);
       toast.error("Login Failed!");
     }
   };
 
   return (
     <main style={{ backgroundColor: "#ffcc00", height: "100vh" }}>
-      <section className="d-flex align-items-center my-5 mt-lg-6 mb-lg-5">
+      <section className="d-flexfalse align-items-center my-5 mt-lg-6 mb-lg-5">
         <Container>
           <Row className="justify-content-center form-bg-image">
             <Col
@@ -72,15 +73,10 @@ export default () => {
                 <div className="text-center text-md-center mb-4 mt-md-0">
                   <h3 className="mb-0">Log in</h3>
                 </div>
-                {error && (
-                  <Alert variant="danger">
-                    Username / Email tidak sesuai! Pastikan anda memasukkan data
-                    yang benar!
-                  </Alert>
-                )}
+                {error && <Alert variant="danger">{errorMessage}</Alert>}
                 <Form className="mt-4" onSubmit={(e) => handleSubmit(e)}>
                   <Form.Group id="username" className="mb-4">
-                    <Form.Label>Username</Form.Label>
+                    <Form.Label>Id Karyawan</Form.Label>
                     <InputGroup>
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faUser} />
@@ -90,27 +86,27 @@ export default () => {
                         required
                         type="text"
                         placeholder="Username"
-                        name="username"
+                        name="id_karyawan"
                         onChange={(e) =>
-                          setUser({ ...user, username: e.target.value })
+                          setUser({ ...user, id_karyawan: e.target.value })
                         }
                       />
                     </InputGroup>
                   </Form.Group>
                   <Form.Group>
                     <Form.Group id="password" className="mb-4">
-                      <Form.Label>Email</Form.Label>
+                      <Form.Label>Password</Form.Label>
                       <InputGroup>
                         <InputGroup.Text>
-                          <FontAwesomeIcon icon={faEnvelope} />
+                          <FontAwesomeIcon icon={faLock} />
                         </InputGroup.Text>
                         <Form.Control
                           required
-                          type="email"
-                          placeholder="Email"
-                          name="email"
+                          type="password"
+                          placeholder="Password"
+                          name="password"
                           onChange={(e) =>
-                            setUser({ ...user, email: e.target.value })
+                            setUser({ ...user, password: e.target.value })
                           }
                         />
                       </InputGroup>
@@ -142,13 +138,13 @@ export default () => {
                     </Button>
                   ) : (
                     <Button variant="primary" type="submit" className="w-100">
-                      Sign in
+                      Log in
                     </Button>
                   )}
 
                   {/* create link to login as admin */}
                   <p className="text-center mt-4 text-gray-700">
-                    Ticketing System
+                    Helpdesk IT System
                     {/* <Card.Link
                       as={Link}
                       to={Routes.SigninAdmin.path}

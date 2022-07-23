@@ -16,7 +16,7 @@ exports.isAdmin = (req, res, next) => {
         status: "failed",
         message: "Unauthorized. silahkan sign in terlebih dahulu",
       });
-    } else if (decoded.level !== "admin") {
+    } else if (decoded.level !== "admin" && decoded.level !== "head") {
       return res.status(401).json({
         status: "failed",
         message: "Unauthorized. only admin can access this resource",

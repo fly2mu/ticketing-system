@@ -111,13 +111,61 @@ const getRequests = async (req, res) => {
       "id_user",
       "user_request",
       "ticket_status",
+      "department",
+      "category",
       "user_process",
       "createdAt",
     ],
     include: [
       {
         model: Requests_Detail,
-        attributes: ["title_request"],
+        attributes: ["title_request", "subjek_request"],
+      },
+      {
+        model: Files,
+        attributes: ["image", "file_document"],
+      },
+    ],
+    limit,
+    offset,
+    // Ini untuk merapihkan hasil query
+    raw: true,
+    nest: true,
+  })
+    .then((data) => {
+      const response = getPagingData(data, page, limit);
+      res.status(200).json({
+        status: "success",
+        data: response,
+      });
+    })
+    .catch((err) => {
+      res.status(400).json({
+        status: "failed",
+        message: "Something went wrong!",
+      });
+    });
+};
+
+// HEAD
+const getRequestsHead = async (req, res) => {
+  const { page, size } = req.query;
+  const { limit, offset } = getPagination(page, size);
+  await Requests.findAndCountAll({
+    attributes: [
+      "id",
+      "id_user",
+      "user_request",
+      "ticket_status",
+      "department",
+      "category",
+      "user_process",
+      "createdAt",
+    ],
+    include: [
+      {
+        model: Requests_Detail,
+        attributes: ["title_request", "subjek_request"],
       },
       {
         model: Files,
@@ -156,13 +204,15 @@ const getAllUserRequest = async (req, res) => {
       "id_user",
       "user_request",
       "ticket_status",
+      "department",
+      "category",
       "user_process",
       "createdAt",
     ],
     include: [
       {
         model: Requests_Detail,
-        attributes: ["title_request"],
+        attributes: ["title_request", "subjek_request"],
       },
       {
         model: Files,
@@ -311,13 +361,15 @@ const getAllUserProcess = async (req, res) => {
       "id_user",
       "user_request",
       "ticket_status",
+      "department",
+      "category",
       "user_process",
       "createdAt",
     ],
     include: [
       {
         model: Requests_Detail,
-        attributes: ["title_request"],
+        attributes: ["title_request", "subjek_request"],
       },
       {
         model: Files,
@@ -696,6 +748,37 @@ const requestDone = async (req, res) => {
   });
 };
 
+const filterDataByDate = async (req, res) => {
+  const { startDate, endDate } = req.body;
+
+  const startedDate = new Date(startDate);
+  const endedDate = new Date(endDate);
+
+  const requests = await Requests.findAll({
+    where: {
+      createdAt: {
+        [Op.and]: {
+          [Op.gte]: startedDate,
+          [Op.lte]: endedDate,
+        },
+      },
+    },
+  });
+
+  if (!requests) {
+    return res.status(500).json({
+      status: "failed",
+      message: "Something went wrong!",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Successfully filter data!",
+    data: requests,
+  });
+};
+
 module.exports = {
   createRequest,
   getRequests,
@@ -714,4 +797,6 @@ module.exports = {
   getUserRequestDone,
   requestDone,
   searchData,
+  filterDataByDate,
+  getRequestsHead,
 };

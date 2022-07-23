@@ -305,6 +305,28 @@ export default (props = {}) => {
                   />
 
                   <NavItem
+                    title="Report Request"
+                    icon={faHandHolding}
+                    link={Routes.RequestReport.path}
+                  />
+
+                  <NavItem
+                    title="Profile"
+                    icon={faUserCircle}
+                    link={Routes.Profile.path}
+                  />
+                </>
+              ) : null}
+
+              {level === "head" ? (
+                <>
+                  <NavItem
+                    title="User Requests"
+                    icon={faHandHolding}
+                    link={Routes.ListRequestHead.path}
+                  />
+
+                  <NavItem
                     title="Profile"
                     icon={faUserCircle}
                     link={Routes.Profile.path}

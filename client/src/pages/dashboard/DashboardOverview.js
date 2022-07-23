@@ -31,7 +31,7 @@ export default () => {
   useEffect(() => {
     (async () => {
       try {
-        if (level === "admin") {
+        if (level === "admin" || level === "head") {
           const countUsers = await getUsersCount();
           const countTeams = await getTeamsCount();
           setUsersCount(countUsers.data.data);
@@ -101,6 +101,45 @@ export default () => {
               />
             </Col>
 
+            <Col xs={12} sm={6} xl={4} className="mb-4">
+              <CounterWidget
+                category="Requests"
+                title={countRequest}
+                icon={faHandHolding}
+                iconColor="shape-tertiary"
+              />
+            </Col>
+            <Col xs={12} sm={6} xl={4} className="mb-4">
+              <CounterWidget
+                category="Waiting"
+                title={waitingCount}
+                icon={faHandHolding}
+                iconColor="shape-secondary"
+              />
+            </Col>
+
+            <Col xs={12} sm={6} xl={4} className="mb-4">
+              <CounterWidget
+                category="Process"
+                title={processCount}
+                icon={faBars}
+                iconColor="shape-tertiary"
+              />
+            </Col>
+
+            <Col xs={12} sm={6} xl={4} className="mb-4">
+              <CounterWidget
+                category="Done"
+                title={doneCount}
+                icon={faCheckCircle}
+                iconColor="shape-tertiary"
+              />
+            </Col>
+          </>
+        ) : null}
+
+        {level === "head" ? (
+          <>
             <Col xs={12} sm={6} xl={4} className="mb-4">
               <CounterWidget
                 category="Requests"

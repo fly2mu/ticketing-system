@@ -11,6 +11,8 @@ const {
   deleteUserById,
   updateUser,
   searchUser,
+  getAllUserHead,
+  getEmployee,
   // searchUserAdmin,
 } = require("../src/controller/userController");
 const {
@@ -31,7 +33,8 @@ const {
   getUserRequestDone,
   requestDone,
   searchData,
-  // paginateData,
+  filterDataByDate,
+  getRequestsHead,
 } = require("../src/controller/requestsController");
 const {
   getCategories,
@@ -63,7 +66,9 @@ let upload = multer({
 // router.post("/login-admin", loginAdmin);
 router.get("/requests-admin", isAdmin, getRequests);
 router.get("/admins", isAdmin, getAllUserAdmin);
+router.get("/heads", isAdmin, getAllUserHead);
 router.get("/users", isAdmin, getAllUsers);
+router.get("/employees", isAdmin, getEmployee);
 router.post("/user", isAdmin, createUser);
 router.get("/users-count", isAuth, getLevelUserCount);
 router.get("/teams-count", isAuth, getLevelTeamCount);
@@ -76,11 +81,15 @@ router.put("/user/:id_user", isAdmin, updateUser);
 router.get("/users/search", isAdmin, searchUser);
 // router.get("/users-admin/search", isAdmin, searchUserAdmin);
 
+// HEAD
+router.get("/requests-head", isAdmin, getRequestsHead);
+
 // TEAM
 router.get("/requests-team", isTeam, getAllUserProcess);
 router.put("/approve-team/:id", isTeam, approveRequestTeam);
 router.put("/reject-team/:id", isTeam, rejectRequestTeam);
 router.put("/done/:id", isTeam, requestDone);
+router.post("/request/filter-date", filterDataByDate);
 
 // USER
 router.post("/login", loginUser);

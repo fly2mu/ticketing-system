@@ -9,6 +9,7 @@ const Category = sequelize.define("categorie", {
     allowNull: false,
   },
   category: DataTypes.STRING,
+  id_type: DataTypes.CHAR(2),
   createdAt: DataTypes.DATE,
   updatedAt: DataTypes.DATE,
 });
