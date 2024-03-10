@@ -63,7 +63,10 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "nodemon": "nodemon --watch server server/app.js",
+    "prod": "npm run build && NODE_ENV=production&& node server/app.js",
+    "prod-no-build": "NODE_ENV=production&& node server/app.js"
   },
   "eslintConfig": {
     "extends": "react-app"
